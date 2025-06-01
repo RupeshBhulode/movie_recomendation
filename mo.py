@@ -20,7 +20,7 @@ all_genres = sorted([genre for genre in df_exploded['genre'].unique() if isinsta
 # Recommender function
 def recommend_movies_by_actor_genre(actor_name, genre_name, hitFlop=5):
     actor_movies = df_exploded[
-        (df_exploded['actors'] == actor_name) &
+        (df_exploded['actors'] == actor_name) & 
         (df_exploded['genre'] == genre_name)
     ]
     hit_movies = actor_movies[actor_movies['hitFlop'] >= hitFlop]
@@ -44,7 +44,30 @@ def get_movie_poster_url(title):
     return None
 
 # Streamlit UI
+st.set_page_config(page_title="Bollywood Recommender", layout="wide")
 st.title("🎬 Bollywood Movie Recommender")
+
+# Custom CSS for dark background and white text
+st.markdown(
+    """
+    <style>
+    html, body, [class*="st-"] {
+        background-color: #000000;
+        color: white;
+    }
+    .stSelectbox label, .stSlider label, .stButton button {
+        color: white !important;
+    }
+    .stMarkdown p {
+        color: white;
+    }
+    .css-1v0mbdj, .css-1v3fvcr, .css-1n76uvr {
+        color: white !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 selected_actor = st.selectbox("Choose an Actor", all_actors)
 selected_genre = st.selectbox("Choose a Genre", all_genres)
@@ -61,11 +84,10 @@ if st.button("Recommended Movies"):
         for i, row in enumerate(recommendations.itertuples()):
             poster_url = get_movie_poster_url(row.title)
             with cols[i]:
-               if poster_url:
-                  st.image(poster_url, use_container_width=True, caption=row.title)
-               else:
-                  st.write(f"🎞️ {row.title}")
-                  st.write("Poster not found")
-
+                if poster_url:
+                    st.image(poster_url, use_container_width=True)
+                st.markdown(f"**🎞️ {row.title}**", unsafe_allow_html=True)
+                st.markdown(f"🗓️ Release Year: {row.releaseYear}", unsafe_allow_html=True)
+                st.markdown(f"⭐ HitFlop Rating: {row.hitFlop}", unsafe_allow_html=True)
     else:
         st.warning("No movie found with the given filters.")
